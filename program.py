@@ -29,9 +29,54 @@ def send_message( names, weights ):
 		json.dump(message, jsonfile)
 	
 def compute_weights(no_pairs):
+	one_day_milli = int( 86400000 )
 	now_milli = int(round(time.time() * 1000))
 	one_quarter_milli = int( 31556952000 )
+	seven_days = int( 7 * one_day_milli )
 
+	r = requests.get('https://api.atrix.finance/api/pools').json()
+	atrix_json = []
+	for pool in r['pools']:
+#		print( pool['market'] )
+		r2 = requests.get('https://api.solscan.io/amm/tvl?address=' + pool['market'] + '&type=1D&time_from=' + str( (now_milli - seven_days) / 1000.0 ) + '&time_to=' + str( (now_milli) / 1000.0 ) ).json()
+		last_tvl = 0
+		counter = 0
+		for item2 in r2['data']['items']:
+			last_tvl = last_tvl + item2['value']
+			counter = counter + 1
+		if counter > 0:	
+			last_tvl = last_tvl / counter	
+
+		r2 = requests.get('https://api.solscan.io/amm/ohlcv?address=' + pool['market'] + '&type=1D&time_from=' + str( (now_milli - seven_days) / 1000.0 ) + '&time_to=' + str( (now_milli) / 1000.0 ) ).json()
+		last_vol = 0
+		counter = 0
+		symbol = ''
+		for item2 in r2['data']['items']:
+			last_vol = last_vol + item2['vUSD']
+			counter = counter + 1
+			symbol = item2['symbol']
+		if counter > 0:
+			last_vol = last_vol / counter
+
+		if last_tvl > 0.0:
+			apy = 0.2 * last_vol / last_tvl
+		else:
+			apy = 0.0
+
+		apy = ( math.pow( 1.0 + ( apy / 100.0 ), 365.25 ) - 1.0 ) * 100.0
+		print( symbol, last_tvl, last_vol, apy )
+
+		if symbol!="":
+			x = '{ "name": "", "apy": 0, "liquidity": 0, "volume_7d": 0, "official": ""}'
+			y = json.loads(x)
+			y['name'] = symbol
+			y['apy'] = apy
+			y['liquidity'] = last_tvl
+			y['volume_7d'] = last_vol
+			y['official'] = True
+
+			atrix_json.append(y) 
+		
 	client = Client()
 	response = client.get_exchange_info()
 
@@ -47,7 +92,8 @@ def compute_weights(no_pairs):
 	#print( binance_assets )
 	exceptions = ['MEDIA', 'ISOLA', 'SOLC'] #excluded from the analysis
 
-	r = requests.get('https://api.raydium.io/pairs').json()
+#	r = requests.get('https://api.raydium.io/pairs').json()
+	r = atrix_json
 
 	names = []
 	apy = []
@@ -154,12 +200,23 @@ def compute_weights(no_pairs):
 	send_message( full_names, weights )
 
 
+#compute_weights(7)
+
 while True:
+
 	try:
 		compute_weights(7)
 	except:
 		pass
 	time.sleep(60 * 60 * 12)
+
+
+
+
+
+
+
+
 
 
 
