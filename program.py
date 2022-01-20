@@ -38,7 +38,10 @@ def compute_weights(no_pairs):
 	atrix_json = []
 	for pool in r['pools']:
 #		print( pool['market'] )
-		r2 = requests.get('https://api.solscan.io/amm/tvl?address=' + pool['market'] + '&type=1D&time_from=' + str( (now_milli - seven_days) / 1000.0 ) + '&time_to=' + str( (now_milli) / 1000.0 ) ).json()
+		try:
+			r2 = requests.get('https://api.solscan.io/amm/tvl?address=' + pool['market'] + '&type=1D&time_from=' + str( (now_milli - seven_days) / 1000.0 ) + '&time_to=' + str( (now_milli) / 1000.0 ) ).json()
+		except:
+			continue
 		last_tvl = 0
 		counter = 0
 		for item2 in r2['data']['items']:
@@ -47,12 +50,17 @@ def compute_weights(no_pairs):
 		if counter > 0:	
 			last_tvl = last_tvl / counter	
 
-		r2 = requests.get('https://api.solscan.io/amm/ohlcv?address=' + pool['market'] + '&type=1D&time_from=' + str( (now_milli - seven_days) / 1000.0 ) + '&time_to=' + str( (now_milli) / 1000.0 ) ).json()
+		try:
+			r2 = requests.get('https://api.solscan.io/amm/ohlcv?address=' + pool['market'] + '&type=1D&time_from=' + str( (now_milli - seven_days) / 1000.0 ) + '&time_to=' + str( (now_milli) / 1000.0 ) ).json()
+		except:
+			continue
+#		print('https://api.solscan.io/amm/ohlcv?address=' + pool['market'] + '&type=1D&time_from=' + str( (now_milli - seven_days) / 1000.0 ) + '&time_to=' + str( (now_milli) / 1000.0 ))
+#		print('https://api.solscan.io/amm/tvl?address=' + pool['market'] + '&type=1D&time_from=' + str( (now_milli - seven_days) / 1000.0 ) + '&time_to=' + str( (now_milli) / 1000.0 ) )
 		last_vol = 0
 		counter = 0
 		symbol = ''
 		for item2 in r2['data']['items']:
-			last_vol = last_vol + item2['vUSD']
+			last_vol = last_vol + item2['v']
 			counter = counter + 1
 			symbol = item2['symbol']
 		if counter > 0:
@@ -209,13 +217,6 @@ while True:
 	except:
 		pass
 	time.sleep(60 * 60 * 12)
-
-
-
-
-
-
-
 
 
 
