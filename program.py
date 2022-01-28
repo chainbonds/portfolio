@@ -66,10 +66,12 @@ def compute_weights(no_pairs):
 		if counter > 0:
 			last_vol = last_vol / counter
 
-		if last_tvl > 0.0:
+		if last_tvl > 0.0 and last_vol < last_tvl:
 			apy = 0.2 * last_vol / last_tvl
 		else:
 			apy = 0.0
+
+		print(apy)
 
 		apy = ( math.pow( 1.0 + ( apy / 100.0 ), 365.25 ) - 1.0 ) * 100.0
 		print( symbol, last_tvl, last_vol, apy )
@@ -208,8 +210,8 @@ def compute_weights(no_pairs):
 	send_message( full_names, weights )
 
 
-#compute_weights(7)
-
+compute_weights(7)
+'''
 while True:
 
 	try:
@@ -217,7 +219,7 @@ while True:
 	except:
 		pass
 	time.sleep(60 * 60 * 12)
-
+'''
 
 
 
