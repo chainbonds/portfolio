@@ -198,8 +198,21 @@ def compute_weights(no_pairs):
 			full_names.append( names[it] )
 			full_prices.append( synthetic_price )
 
-	full_names = np.array(full_names)
-	full_prices = np.array(full_prices).T
+	sizes_list = []
+	for it in range(len(full_names)):
+		sizes_list.append( len(full_prices[it]) )
+	counts = np.bincount( np.array(sizes_list) )
+	ref_size = np.argmax( counts )
+
+	final_names = []
+	final_prices = []
+	for it in range(len(full_names)):
+		if len(full_prices[it]) == ref_size:
+			final_names.append( full_names[it] )
+			final_prices.append( full_prices[it] )
+
+	full_names = np.array(final_names)
+	full_prices = np.array(final_prices).T
 	
 	df_assets_opt = pd.DataFrame( data=full_prices, index=list(np.arange(full_prices.shape[0])), columns=list(full_names) )
 	#print( df_assets_opt )
