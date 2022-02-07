@@ -31,7 +31,7 @@ def opt_weights(df_assets_opt, rfr):
 
 def send_message( names, weights, protocol ):
 	files = 'weight_status.json'
-	message = [{'lp': n, 'weight': w, 'protocol': p} for n, w, p in zip(names, weights, protocol)]
+	message = [{'lp': n, 'weight': round(w, 3), 'protocol': p} for n, w, p in zip(names, weights, protocol)]
 	with open(files, 'w') as jsonfile:
 		json.dump(message, jsonfile)
 
