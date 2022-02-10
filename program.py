@@ -31,7 +31,7 @@ def opt_weights(df_assets_opt, rfr):
 
 def send_message( names, weights, protocol ):
 	files = 'weight_status.json'
-	message = [{'lp': n, 'weight': round(w, 3), 'protocol': p} for n, w, p in zip(names, weights, protocol)]
+	message = [{'lp': n, 'weight': int(round(1000.0 * w)), 'protocol': p} for n, w, p in zip(names, weights, protocol)]
 	with open(files, 'w') as jsonfile:
 		json.dump(message, jsonfile)
 
@@ -303,8 +303,8 @@ def compute_weights(no_pairs):
 	counts = np.bincount( np.array(sizes_list) )
 	ref_size = np.argmax( counts )
 
-	total_solend = 2
-	total_saber = 1
+	total_solend = 0
+	total_saber = 3
 	int_solend = 0
 	int_saber = 0
 	final_names = []
