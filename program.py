@@ -25,9 +25,19 @@ def opt_weights(df_assets_opt, rfr):
 		weights = ef.max_sharpe(risk_free_rate=rfr)
 		weights = ef.clean_weights()
 		ret_tangent, std_tangent, sharpe = ef.portfolio_performance(risk_free_rate=rfr, verbose=True)
+		print('Successfully computed Sharpe ratio with risk-free asset')
 		return [ sharpe, np.array( list( weights.items() ) )[:,1].astype(float) ]
 	except:
-		return [ 0.0, np.zeros( len(df_assets_opt.columns) ) ]
+
+		try:
+			weights = ef.max_sharpe(risk_free_rate=0.0)
+			weights = ef.clean_weights()
+			ret_tangent, std_tangent, sharpe = ef.portfolio_performance(risk_free_rate=0.0, verbose=True)
+			print('Successfully computed Sharpe ratio without risk-free asset')
+			return [ sharpe, np.array( list( weights.items() ) )[:,1].astype(float) ]
+		except:
+			print('Something went wrong')
+			return [ 0.0, np.zeros( len(df_assets_opt.columns) ) ]
 
 def send_message( names, weights, protocol ):
 	files = 'weight_status.json'
@@ -333,14 +343,14 @@ def compute_weights(no_pairs):
 	df_assets_opt = pd.DataFrame( data=full_prices, index=list(np.arange(full_prices.shape[0])), columns=list(full_names) )
 	#print( df_assets_opt )
 
-	sharpe, weights = opt_weights( df_assets_opt, 0.0 )
+	sharpe, weights = opt_weights( df_assets_opt, risk_free_return )
 	print( weights )
 
 	send_message( full_names, weights, final_protocol )
 
 
-compute_weights(3)
-'''
+#compute_weights(3)
+
 while True:
 
 	try:
@@ -348,7 +358,7 @@ while True:
 	except:
 		pass
 	time.sleep(60 * 60 * 12)
-'''
+
 
 
 
